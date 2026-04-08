@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chromebooks</title>
+    <link rel="stylesheet" href="/css/adminStyles.css" />
+  </head>
+  <body>
+    <h1>CHROMEBOOKS</h1>
+    <div>
+      <div class="search-container">
+        <div class="upload-container">
+          <input type="file" id="csv-file" class="input-hidden" accept=".csv" />
+          <label for="csv-file" class="custom-file-upload">
+            <i class="fas fa-upload"></i> Escolher Arquivo CSV
+          </label>
+          <span id="file-name">Nenhum arquivo selecionado</span>
+        </div>
+        <div class="button-group">
+          <div class="section-label">Filtros</div>
+          <button type="button" onclick="filtrarTabela('6')">Bloco 06</button>
+          <button type="button" onclick="filtrarTabela('7')">Bloco 07</button>
+          <button type="button" onclick="filtrarTabela('10')">Bloco 10</button>
+          <button
+            type="button"
+            onclick="filtrarTabela('todos')"
+            style="background-color: #7f8c8d"
+          >
+            Ver Todos
+          </button>
+
+          <div class="section-label">Gerenciamento</div>
+        
+          <div class="actions-container">
+            <button type="button" class="btn-add" id="btn-adicionar">
+            <span class="icon-plus"></span>
+            Nova Reserva
+          </button>
+          <button class="btn-update" title="Adicionar sem apagar" style="background-color: #27ae60; margin-left: 10px;">
+    <span class="icon-plus"></span>
+    Atualizar (Adicionar)
+  </button>
+            <button class="btn-save" title="Salvar Alterações">
+              <span class="icon-save"></span>
+              Salvar Reservas
+            </button>
+            <button type="button"  class="btn-editar" id="btn-editar-vistas" style="background-color: #3498db;">
+    <i class="fas fa-edit"></i> Editar Reservas Existentes
+</button>
+<button type="button" class="btn-clear" id="btn-excluir-selecionados" title="Excluir Selecionados">
+    <i class="fas fa-trash-alt"></i> Excluir Selecionados
+</button>
+  <button type="button" class="btn-clear" id="btn-limpar-tabela" title="Limpar todas as linhas">
+    <i class="fas fa-trash-alt"></i> Limpar Tabela
+</button>
+</div>
+          </div>
+        </div>
+      </div>
+      <pre id="resultado-json"></pre>
+      <div class="bloco-container">
+        <div class="bloco-header_reserva">Chromebooks Agendados</div>
+        <div>
+          <div class="table-scroll-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Selecionar</th>
+                  <th>Data</th>
+                  <th>Bloco</th>
+                  <th>Local</th>
+                  <th>Horário Abertura</th>
+                  <th>Horário Prova</th>
+                  <th>Carrinho</th>
+                  <th>Quantidade</th>
+                  <th>Observação</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody class="tabela-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+      import {
+        getDatabase,
+        ref,
+        set,
+      } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+      const firebaseConfig = {
+    apiKey: "AIzaSyBeBsunmgwAKgRbJw09RXuvSNQjJRDx76k",
+    authDomain: "sistema-chromebook.firebaseapp.com",
+    projectId: "sistema-chromebook",
+    storageBucket: "sistema-chromebook.firebasestorage.app",
+    messagingSenderId: "1018789010735",
+    appId: "1:1018789010735:web:53b6ca723680e8979b95da",
+    measurementId: "G-PWFMVFWPKR"
+  };
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+
+      window.salvarNoFirebase = async (dados) => {
+        try {
+          await set(ref(db, "chromebooks"), dados);
+          alert("✅ Sucesso! Verifique seu console do Firebase.");
+        } catch (e) {
+          console.error(e);
+          alert("Erro ao salvar: " + e.message);
+        }
+      };
+
+    import { get, child } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-database.js";
+
+    window.atualizarNoFirebase = async (dados) => {
+      try {
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, "chromebooks"));
+    
+        let proximoIndice = 0;
+        if (snapshot.exists()) {
+        proximoIndice = snapshot.val().length;
+        }
+
+   
+        const promessas = dados.map((item, index) => {
+        const numeroRegistro = proximoIndice + index;
+        return set(ref(db, `chromebooks/${numeroRegistro}`), item);
+      });
+
+    await Promise.all(promessas);
+    alert(`✅ ${dados.length} reservas adicionadas com sucesso a partir do índice ${proximoIndice}!`);
+     
+  } catch (e) {
+    console.error("Erro ao atualizar:", e);
+    alert("Erro: " + e.message);
+  }
+};
+
+window.buscarReservasFirebase = async () => {
+  const dbRef = ref(db);
+  try {
+    const snapshot = await get(child(dbRef, "chromebooks"));
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      alert("Nenhuma reserva encontrada.");
+      return [];
+    }
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
+    </script>
+    <script src="/admin/main.js"></script>
+  </body>
+</html>

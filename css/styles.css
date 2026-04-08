@@ -1,0 +1,818 @@
+/* Estilos gerais */
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0 10px 40px 10px;
+  background-color: #f9f9f9;
+}
+
+h1 {
+  color: #00008b;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+}
+
+h2 {
+  color: #00008b;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin-bottom: 30px !important;
+}
+
+.tituloContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.search-container {
+  margin: 20px auto;
+  width: 70%;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.bloco-container {
+  width: 75%;
+  margin: 10px auto;
+  text-align: left;
+}
+
+.bloco-header {
+  color: #00008b;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding: 15px;
+  background-color: #e7e7ff;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bloco-header_reserva {
+  color: #00008b;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 0;
+  padding: 15px;
+  background-color: #e7e7ff;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bloco-header:hover {
+  background-color: #d8d8ff;
+}
+
+.bloco-header::after {
+  content: "\002B";
+  font-size: 20px;
+  font-weight: bold;
+  color: #00008b;
+  transition: transform 0.2s;
+}
+
+.bloco-header.active::after {
+  content: "\2212";
+}
+
+.content {
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-top: none;
+}
+
+/* Ajuste Técnico: Permite expansão total sem cortes */
+.content.show {
+  max-height: none;
+}
+
+/* Remove o scroll horizontal e ajusta largura */
+.table-scroll-wrapper {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+table {
+  display: block;
+  width: 100%;
+}
+
+/* Esconde o cabeçalho original da tabela (TH) */
+thead {
+  display: none;
+}
+
+tbody,
+tr,
+td {
+  display: block;
+  width: 100%;
+}
+
+/* Cada linha vira um Card */
+tbody tr {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilização das "Células" - Estratégia de Empilhamento Total */
+td {
+  display: block !important; /* Transforma cada célula em um bloco único */
+  width: 100% !important;
+  box-sizing: border-box;
+  border: none !important;
+  padding: 10px 15px !important;
+  text-align: left !important; /* Alinha tudo à esquerda para evitar sumir à direita */
+  background-color: white;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* O "Rótulo" (Bloco, Local, etc) */
+td::before {
+  content: attr(data-label);
+  display: block; /* Força o título a ficar em sua própria linha */
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: #888; /* Cor mais clara para o rótulo */
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+}
+
+/* O "Conteúdo" (o dado em si) */
+/* Note que aqui usamos o estilo que você já tinha (azul e negrito) */
+td {
+  color: #00008b;
+  font-weight: bold;
+  font-size: 15px; /* Aumentei um pouco para facilitar leitura no mobile */
+  line-height: 1.4;
+}
+
+/* Linha divisória entre as informações dentro do Card */
+td:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+/* Força o container e a tabela a nunca passarem da largura da tela */
+html,
+body {
+  overflow-x: hidden; /* Proíbe o scroll lateral no nível da página */
+  width: 100%;
+  padding: 0 15px 40px 15px; /* Aumentei o respiro lateral para 15px */
+  box-sizing: border-box;
+}
+
+.bloco-container,
+.table-scroll-wrapper,
+table,
+tbody,
+tr {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
+  box-sizing: border-box;
+}
+
+/* Ajuste específico para o efeito de zebra ou hover que pode estar atrapalhando */
+tbody tr:hover {
+  background-color: transparent; /* Evita mudanças de cor que mascaram o texto */
+}
+
+/* Garante que o container principal não tenha largura fixa maior que a tela */
+.bloco-container,
+.table-scroll-wrapper,
+table {
+  max-width: 100vw;
+  box-sizing: border-box;
+}
+
+/* Ajuste do Accordion para Mobile */
+.bloco-container {
+  width: 95%;
+  margin: 10px auto;
+}
+
+.bloco-header {
+  font-size: 16px;
+  padding: 12px;
+  border-radius: 5px;
+}
+
+/*
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+th,
+td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  vertical-align: top;
+  word-wrap: break-word;
+}
+
+th {
+  background-color: #00008b;
+  color: white;
+  text-align: left;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+td {
+  background-color: white;
+  color: #00008b;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+td:nth-child(1) {
+  width: 120px;
+  white-space: nowrap;
+}
+
+td:nth-child(2) {
+  width: 200px;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+tbody tr:hover {
+  background-color: #e0e0ff;
+}
+
+@media screen and (max-width: 768px) {
+  .bloco-container,
+  .search-container {
+    width: 98%;
+  }
+  td,
+  th {
+    padding: 8px;
+    font-size: 12px;
+  }
+  td:nth-child(1) {
+    width: 90px;
+  }
+}*/
+
+.input-hidden {
+  display: none;
+}
+
+.custom-file-upload {
+  display: inline-block;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #00008b;
+  color: white;
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.custom-file-upload:hover {
+  background-color: #1d4ed8;
+}
+
+.custom-file-upload:active {
+  transform: scale(0.98);
+}
+
+#file-name {
+  margin-left: 10px;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+.btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #fee2e2; /* Vermelho bem clarinho */
+  color: #dc2626; /* Texto vermelho vivo */
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Efeito ao passar o mouse */
+.btn-delete:hover {
+  background-color: #dc2626;
+  color: white;
+  border-color: #dc2626;
+  box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
+}
+
+/* Efeito ao clicar */
+.btn-delete:active {
+  transform: scale(0.95);
+}
+
+/* Desenho da Lixeira (Ícone CSS) */
+.icon-trash {
+  width: 12px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top: none;
+  position: relative;
+  border-radius: 0 0 2px 2px;
+}
+
+/* Tampa da lixeira */
+.icon-trash::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -2px;
+  width: 16px;
+  height: 2px;
+  background-color: currentColor;
+}
+
+/* Alça da tampa */
+.icon-trash::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 3px;
+  width: 6px;
+  height: 2px;
+  border: 2px solid currentColor;
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+}
+
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #ecfdf5; /* Verde bem clarinho (Emerald 50) */
+  color: #059669; /* Verde esmeralda vivo */
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actions-container {
+  display: flex;
+  justify-content: center; /* Centraliza horizontalmente */
+  padding: 5px 0; /* Cria o "respiro" em cima e embaixo (não deixa grudar) */
+  width: 100%;
+}
+
+/* Botão Salvar - Versão Aumentada */
+.btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 9px;
+  padding: 14px 32px; /* Aumentei o tamanho interno (mais gordinho) */
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 2px solid #a7f3d0;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.1); /* Sombra leve constante */
+}
+
+/* Hover: Feedback mais forte */
+.btn-save:hover {
+  background-color: #059669;
+  color: white;
+  border-color: #059669;
+  transform: translateY(-2px); /* Efeito de levitar ao passar o mouse */
+  box-shadow: 0 6px 15px rgba(5, 150, 105, 0.3);
+}
+
+/* Clique */
+.btn-save:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Ícone levemente maior para acompanhar o botão */
+.icon-save {
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  position: relative;
+  border-radius: 3px;
+}
+.icon-save::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 4px;
+  width: 6px;
+  height: 5px;
+  border: 1.5px solid currentColor;
+  border-top: none;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+button {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  background-color: #34495e;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #eff6ff; /* Azul clarinho */
+  color: #2563eb; /* Azul royal */
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add:hover {
+  background-color: #2563eb;
+  color: white;
+  border-color: #2563eb;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.btn-add:active {
+  transform: scale(0.95);
+}
+
+/* Ícone de Plus (+) em CSS puro */
+.icon-plus {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  display: inline-block;
+}
+
+.icon-plus::before,
+.icon-plus::after {
+  content: "";
+  position: absolute;
+  background-color: currentColor;
+  border-radius: 2px;
+}
+
+/* Linha horizontal */
+.icon-plus::before {
+  top: 6px;
+  left: 0;
+  width: 14px;
+  height: 2px;
+}
+
+/* Linha vertical */
+.icon-plus::after {
+  top: 0;
+  left: 6px;
+  width: 2px;
+  height: 14px;
+}
+
+/* Container do título e botão de voltar */
+.header-edicao {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
+}
+
+.header-edicao h2 {
+  margin: 0; /* Remove margens padrão para alinhar com o botão */
+}
+
+/* Estilo do Botão Voltar */
+.btn-back {
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-back:hover {
+  background-color: #7f8c8d;
+}
+
+.btn-back i {
+  font-size: 0.8rem;
+}
+
+.btn-editar {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: 9px;
+  padding: 14px 32px; /* Aumentei o tamanho interno (mais gordinho) */
+  background-color: #ecfdf5;
+  color: white;
+  border: 2px solid #2563eb;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(7, 25, 131, 0.1); /* Sombra leve constante */
+}
+
+/* Hover: Feedback mais forte */
+.btn-editar:hover {
+  background-color: #0d2049;
+  color: white;
+  border-color: #2563eb;
+  transform: translateY(-2px); /* Efeito de levitar ao passar o mouse */
+  box-shadow: 0 6px 15px rgba(7, 25, 131, 0.1);
+}
+
+/* Clique */
+.btn-editar:active {
+  transform: translateY(0) scale(0.96);
+}
+
+/* Estilo para a linha divisória com texto */
+.section-label {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 20px 0 10px 0;
+  color: #7f8c8d;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.section-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+  margin-left: 15px;
+}
+
+/* Ajuste no button-group para que as labels ocupem a linha toda */
+.button-group {
+  display: flex;
+  flex-wrap: wrap; /* Permite que a label quebre a linha */
+  gap: 10px;
+  align-items: center;
+}
+
+/* Barra de topo no modo edição */
+.header-edicao-fixo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #dee2e6;
+  position: sticky; /* Opcional: mantém no topo ao rolar */
+  top: 10px;
+  z-index: 100;
+}
+
+.acoes-edicao {
+  display: flex;
+  gap: 15px;
+}
+
+/* Botão Salvar Especial para Edição */
+.btn-save-edit {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-save-edit:hover {
+  background-color: #219150;
+  transform: scale(1.05);
+}
+
+/* Botão Sair */
+.btn-back {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-clear {
+  background-color: #34495e; /* Cinza azulado escuro */
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 10px;
+}
+
+.btn-clear:hover {
+  background-color: #c0392b; /* Muda para vermelho ao passar o mouse */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-clear i {
+  font-size: 0.85rem;
+}
+
+/* Estilização da Checkbox Individual */
+.row-checkbox {
+  /* Remove o visual padrão do navegador */
+  appearance: none;
+  -webkit-appearance: none;
+
+  /* Tamanho maior */
+  width: 20px;
+  height: 20px;
+
+  /* Design e Cores */
+  border: 2px solid #3498db;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  position: relative;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+/* Efeito ao passar o mouse */
+.row-checkbox:hover {
+  border-color: #2980b9;
+  background-color: #f7f9f9;
+}
+
+/* Estilo quando estiver MARCADO */
+.row-checkbox:checked {
+  background-color: #3498db;
+  border-color: #3498db;
+}
+
+/* Criando o ícone de "check" (V) usando um pseudo-elemento */
+.row-checkbox:checked::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Alinhamento na célula da tabela */
+.tabela-body td:first-child,
+thead th:first-child {
+  text-align: center;
+  width: 50px; /* Largura fixa para a coluna de seleção */
+}
+
+/* Estilização do Botão Excluir Selecionados */
+.btn-delete-mass {
+  background-color: #e74c3c; /* Vermelho vibrante */
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* Espaço entre o ícone e o texto */
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-left: 10px;
+}
+
+/* Efeito ao passar o mouse (Hover) */
+.btn-delete-mass:hover {
+  background-color: #c0392b; /* Vermelho mais escuro */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Efeito ao clicar (Active) */
+.btn-delete-mass:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para quando o botão estiver desativado (opcional) */
+.btn-delete-mass:disabled {
+  background-color: #fab1a0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Adicionando um ícone via Pseudo-elemento (Lixeira) */
+.btn-delete-mass::before {
+  content: "\f2ed"; /* Código da lixeira no FontAwesome */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+}
