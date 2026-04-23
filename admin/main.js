@@ -7,34 +7,32 @@ const btnUpdate = document.querySelector(".btn-update");
 const btnEditarVistas = document.getElementById("btn-editar-vistas");
 const btnLimpar = document.getElementById("btn-limpar-tabela");
 
-fileInput.addEventListener("change", function (e) {
-  if (this.files && this.files.length > 0) {
-    fileNameDisplay.textContent = this.files[0].name;
-  } else {
-    fileNameDisplay.textContent = "Nenhum arquivo selecionado";
-  }
+fileInput.addEventListener("change", async function (e) {
+  const arquivos = Array.from(this.files);
+  if (arquivos.length === 0) return;
 
-  const arquivo = e.target.files[0];
-  if (!arquivo) return;
+  fileNameDisplay.textContent =
+    arquivos.length > 1 ? `${arquivos.length} arquivos` : arquivos[0].name;
+  let todasAsLinhasHtml = "";
 
-  const leitor = new FileReader();
-
-  leitor.onload = function (e) {
-    const texto = e.target.result;
+  for (const arquivo of arquivos) {
+    const texto = await lerArquivo(arquivo);
     const dadosJson = csvToJson(texto);
 
-    // FILTRO: Apenas Chromebook
+    // FILTRO: Usando chaves minúsculas conforme a normalização nova
     const apenasChromebooks = dadosJson.filter(
-      (item) => item.Pedido && item.Pedido.toLowerCase().includes("chromebook"),
+      (item) => item.pedido && item.pedido.toLowerCase().includes("chromebook"),
     );
 
-    let linhasHtml = "";
+    console.log(
+      `Arquivo: ${arquivo.name} | Encontrados: ${apenasChromebooks.length}`,
+    );
 
     apenasChromebooks.forEach((item) => {
-      let localOriginal = (item.Local || "").trim();
+      // Ajuste aqui para usar as chaves minúsculas
+      let localOriginal = (item.local || "").trim();
       let numeroBloco = "";
 
-      // Lógica de identificação de bloco (Mantida)
       const blocos = {
         10: [
           "Laboratório de Informática 15",
@@ -85,7 +83,6 @@ fileInput.addEventListener("change", function (e) {
           "(Bloco 6)",
         ],
       };
-
       for (const [numero, salas] of Object.entries(blocos)) {
         if (salas.some((sala) => localOriginal.includes(sala))) {
           numeroBloco = numero;
@@ -93,36 +90,88 @@ fileInput.addEventListener("change", function (e) {
         }
       }
 
-      const horarioOriginal = item.Horario || "";
-      const horarioProvaFormatado = horarioOriginal.replace(/h/g, ":");
-      console.log(horarioProvaFormatado);
+      // Lógica de horários (use item.horario)
+      let horarioBruto = (item.horario || "").replace(/h/g, ":");
+      let partesHorario = horarioBruto.split("-").map((p) => p.trim());
+      const horarioAbertura = partesHorario[0] || "";
+      const inicioProvaComDelay = adicionarTrintaMinutos(horarioAbertura);
+      const fimOriginal = partesHorario[1] || "";
+      const horarioProvaFormatado = fimOriginal
+        ? `${inicioProvaComDelay} - ${fimOriginal}`
+        : inicioProvaComDelay;
 
-      // NOVA VARIÁVEL
-      const horarioAbertura = calcularHorarioAbertura(horarioProvaFormatado);
-
-      let localLimpo = localOriginal.replace(/\s*\(.*?\)\s*/g, " ").trim();
-
-      // MONTAGEM DA LINHA (Checkbox + Colunas Solicitadas)
-      linhasHtml += `
+      todasAsLinhasHtml += `
         <tr>
           <td><input type="checkbox" class="row-checkbox"></td>
-          <td>${item.DatadaReserva || ""}</td>
+          <td>${formatarDataBR(item.datadareserva)}</td>
+          <td>${item.usuario || item.responsavel || ""}</td>
           <td style="text-align: center; font-weight: bold;">${numeroBloco}</td> 
-          <td>${localLimpo}</td> 
+          <td>${localOriginal.replace(/\s*\(.*?\)\s*/g, " ").trim()}</td> 
           <td>${horarioAbertura}</td>
-          <td>${horarioProvaFormatado || ""}</td>
+          <td>${horarioProvaFormatado}</td>
           <td>${gerarHtmlCarrinhos()}</td>
-          <td style="text-align: center;">${item.Quantidade || "0"}</td>
-          <td><input type="text" class="searchInput" placeholder="Observação"></td>
-          <td><button class="btn-delete" title="Excluir">Excluir</button></td>
+          <td style="text-align: center;">${item.quantidade || "0"}</td>
+          <td><input type="text" class="searchInput" placeholder="Obs"></td>
+          <td><button class="btn-delete">Excluir</button></td>
         </tr>
       `;
     });
+  }
 
-    content.innerHTML = linhasHtml;
-  };
-  leitor.readAsText(arquivo);
+  // Insere tudo no final da tabela sem apagar o que já existe
+  content.insertAdjacentHTML("beforeend", todasAsLinhasHtml);
 });
+function csvToJson(csv) {
+  const todasAsLinhas = csv
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l !== "");
+
+  // BUSCA RIGOROSA: Só aceita como cabeçalho se a linha tiver Usuario E Local E Pedido
+  const indexCabecalho = todasAsLinhas.findIndex((linha) => {
+    const l = linha
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    return l.includes("usuario") && l.includes("local") && l.includes("pedido");
+  });
+
+  if (indexCabecalho === -1) return [];
+
+  const cabecalhos = todasAsLinhas[indexCabecalho]
+    .split(";")
+    .map((c) => c.trim());
+  const dados = todasAsLinhas.slice(indexCabecalho + 1);
+
+  // Normaliza as chaves para minúsculas e sem acento (ex: "pedido", "local", "datadareserva")
+  const cabecalhosLimpos = cabecalhos.map((header) => {
+    return header
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "")
+      .toLowerCase();
+  });
+
+  return dados.map((linha) => {
+    const valores = linha.split(";");
+    const objeto = {};
+    cabecalhosLimpos.forEach((chave, i) => {
+      objeto[chave] = valores[i] ? valores[i].trim() : "";
+    });
+    return objeto;
+  });
+}
+
+function lerArquivo(file) {
+  return new Promise((resolve, reject) => {
+    const leitor = new FileReader();
+    leitor.onload = (e) => resolve(e.target.result);
+    leitor.onerror = (e) => reject(e);
+    // Usamos ISO-8859-1 para garantir que "Usuário" não vire "Usurio"
+    leitor.readAsText(file, "ISO-8859-1");
+  });
+}
+
 container.addEventListener("click", function (event) {
   const btnDelete = event.target.closest(".btn-delete");
 
@@ -193,26 +242,28 @@ function capturarDadosDaTabela() {
       // 0: Check | 1: Data | 2: Bloco | 3: Local | 4: Abertura | 5: Prova | 6: Carrinhos | 7: Qtd | 8: Obs
       reserva = {
         data: pegarValor(colunas[1]),
-        bloco: pegarValor(colunas[2]),
-        local: pegarValor(colunas[3]),
-        horarioAbertura: pegarValor(colunas[4]),
-        horario: pegarValor(colunas[5]),
-        carrinhos: pegarValor(colunas[6]),
-        quantidade: pegarValor(colunas[7]),
-        observacao: pegarValor(colunas[8]),
+        responsavel: pegarValor(colunas[2]),
+        bloco: pegarValor(colunas[3]),
+        local: pegarValor(colunas[4]),
+        horarioAbertura: pegarValor(colunas[5]),
+        horario: pegarValor(colunas[6]),
+        carrinhos: pegarValor(colunas[7]),
+        quantidade: pegarValor(colunas[8]),
+        observacao: pegarValor(colunas[9]),
       };
     } else {
       // ESTRUTURA: MODO EDIÇÃO (9 colunas)
       // 0: Data | 1: Bloco | 2: Abertura | 3: Prova | 4: Local | 5: Carrinhos | 6: Qtd | 7: Obs
       reserva = {
         data: pegarValor(colunas[0]),
-        bloco: pegarValor(colunas[1]),
-        horarioAbertura: pegarValor(colunas[2]),
-        horario: pegarValor(colunas[3]),
-        local: pegarValor(colunas[4]),
-        carrinhos: pegarValor(colunas[5]),
-        quantidade: pegarValor(colunas[6]),
-        observacao: pegarValor(colunas[7]),
+        responsavel: pegarValor(colunas[1]),
+        bloco: pegarValor(colunas[2]),
+        horarioAbertura: pegarValor(colunas[3]),
+        horario: pegarValor(colunas[4]),
+        local: pegarValor(colunas[5]),
+        carrinhos: pegarValor(colunas[6]),
+        quantidade: pegarValor(colunas[7]),
+        observacao: pegarValor(colunas[8]),
       };
     }
 
@@ -318,45 +369,6 @@ function filtrarTabela(criterio) {
   });
 }
 
-function csvToJson(csv) {
-  const todasAsLinhas = csv
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => l !== "");
-
-  // Busca o cabeçalho normalizando acentos
-  const indexCabecalho = todasAsLinhas.findIndex((linha) => {
-    const linhaNormalizada = linha
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase();
-    return linhaNormalizada.includes("usuario") && linha.includes(";");
-  });
-
-  if (indexCabecalho === -1) return [];
-
-  const cabecalhos = todasAsLinhas[indexCabecalho]
-    .split(";")
-    .map((c) => c.trim());
-  const dados = todasAsLinhas.slice(indexCabecalho + 1);
-
-  const cabecalhosLimpos = cabecalhos.map((header) => {
-    return header
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "");
-  });
-
-  return dados.map((linha) => {
-    const valores = linha.split(";");
-    const objeto = {};
-    cabecalhosLimpos.forEach((chave, i) => {
-      objeto[chave] = valores[i] ? valores[i].trim() : "";
-    });
-    return objeto;
-  });
-}
-
 const btnAdicionar = document.getElementById("btn-adicionar");
 
 btnAdicionar.addEventListener("click", () => {
@@ -365,6 +377,7 @@ btnAdicionar.addEventListener("click", () => {
   novaLinha.innerHTML = `
     <td><input type="checkbox" class="row-checkbox"></td>
     <td><input type="date" class="searchInput"></td>
+    <td><input type="text" placeholder="Responsável" class="searchInput"></td>
     <td><input type="text" placeholder="Bloco" class="searchInput" style="width:50px"></td> 
     <td><input type="text" placeholder="Local" class="searchInput"></td>
     <td><input type="text" placeholder="Abertura" class="searchInput"></td>
@@ -425,7 +438,8 @@ function renderizarModoEdicao(dados) {
       .map(
         (item) => `
     <tr>
-        <td><input type="text" class="searchInput" value="${item.data || ""}"></td>
+        <td><input type="text" class="searchInput" value="${formatarDataBR(item.data)}"></td>
+        <td><input type="text" class="searchInput" value="${item.Usuario || item.responsavel || ""}"></td>
         <td><input type="text" class="searchInput" style="width:50px" value="${item.bloco || ""}"></td>
         <td><input type="text" class="searchInput" style="width:70px" value="${item.horarioAbertura || ""}"></td>
         <td><input type="text" class="searchInput" value="${item.horario || ""}"></td>
@@ -445,7 +459,8 @@ function renderizarModoEdicao(dados) {
                 <table>
                     <thead>
                         <tr>
-                            <th>Data</th><th>Bloco</th><th>Abertura</th><th>Prova</th><th>Local</th><th>Carrinhos</th><th>Quantidade</><th>Observação</th><th>Ações</th>
+                            <th>Data</th>
+                            <th>Responsável</th><th>Bloco</th><th>Abertura</th><th>Prova</th><th>Local</th><th>Carrinhos</th><th>Quantidade</><th>Observação</th><th>Ações</th>
                         </tr>
                     </thead>
                     <tbody class="tabela-body">${linhas}</tbody>
@@ -521,18 +536,13 @@ btnExcluirSelecionados.addEventListener("click", function () {
   }
 });
 
-function calcularHorarioAbertura(horarioFull) {
-  if (!horarioFull) return "";
+function adicionarTrintaMinutos(horario) {
+  if (!horario || !horario.includes(":")) return horario;
 
-  // Extrai apenas o horário inicial (antes do "-") e padroniza para ":"
-  let inicio = horarioFull.split("-")[0].trim().replace("h", ":");
-  let [horas, minutos] = inicio.split(":").map(Number);
+  let [horas, minutos] = horario.split(":").map(Number);
+  let totalMinutos = horas * 60 + minutos + 30;
 
-  // Converte tudo para minutos, subtrai 30 e volta para o formato HH:mm
-  let totalMinutos = horas * 60 + minutos - 30;
-
-  // Garante que não teremos valores negativos (ex: 00:15 vira 23:45)
-  if (totalMinutos < 0) totalMinutos += 1440;
+  if (totalMinutos >= 1440) totalMinutos -= 1440;
 
   const h = Math.floor(totalMinutos / 60)
     .toString()
@@ -541,7 +551,6 @@ function calcularHorarioAbertura(horarioFull) {
 
   return `${h}:${m}`;
 }
-
 // Função para gerar o HTML do Multi-select de Carrinhos
 function gerarHtmlCarrinhos(valoresSelecionados = "") {
   // Converte a string salva em um Array para facilitar a comparação
@@ -551,7 +560,8 @@ function gerarHtmlCarrinhos(valoresSelecionados = "") {
 
   let optionsHtml = "";
   for (let i = 1; i <= 17; i++) {
-    const nomeCarrinho = `Carrinho ${i}`;
+    const numeroFormatado = i.toString().padStart(2, "0");
+    const nomeCarrinho = `${numeroFormatado}`;
     // Verifica se este carrinho específico está na lista de selecionados
     const checked = listaSelecionados.includes(nomeCarrinho) ? "checked" : "";
 
@@ -614,3 +624,28 @@ window.onclick = function (event) {
       .forEach((el) => (el.style.display = "none"));
   }
 };
+
+function formatarDataBR(dataStr) {
+  if (!dataStr) return "";
+
+  // Se a data vier com hífen (ex: 2026-04-15), transforma em 15/04/2026
+  if (dataStr.includes("-")) {
+    const [ano, mes, dia] = dataStr.split("-");
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  // Se a data vier com barra (ex: 04/15/2026), inverte mês e dia
+  if (dataStr.includes("/")) {
+    const partes = dataStr.split("/");
+    // Se a primeira parte tiver 4 dígitos, é AAAA/MM/DD
+    if (partes[0].length === 4) {
+      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+    // Caso contrário, assume que é MM/DD/AAAA e inverte para DD/MM/AAAA
+    // Só inverte se o primeiro termo for um mês provável (<= 12) e o segundo um dia (> 12)
+    // Ou simplesmente inverte se você sabe que o CSV vem sempre trocado:
+    return `${partes[1]}/${partes[0]}/${partes[2]}`;
+  }
+
+  return dataStr;
+}
