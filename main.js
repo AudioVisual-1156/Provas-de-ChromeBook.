@@ -77,6 +77,7 @@ async function searchData() {
   try {
     const busca = await fetch(FIREBASE_URL);
     let dadosRaw = await busca.json();
+    console.log(dadosRaw);
 
     if (!dadosRaw) return;
 
@@ -107,7 +108,8 @@ async function searchData() {
         carrinhos: item.carrinhos || "",
         quantidade: item.quantidade || "",
         observacao: item.observacao || "",
-        periodo: periodo, // Nova propriedade para o agrupamento
+        periodo: periodo,
+        responsavel: item.responsavel || "",
       };
     });
 
@@ -148,7 +150,7 @@ async function searchData() {
         const linhas = dadosFiltrados
           .map(
             (item) => `
-  <tr>
+  <tr>       
     <td data-label="Bloco">${item.bloco}</td>
     <td data-label="Local">${item.local}</td> 
     <td data-label="Abertura">${item.horarioAbertura}</td>
@@ -156,6 +158,7 @@ async function searchData() {
     <td data-label="Carrinhos">${item.carrinhos}</td>
     <td data-label="Quantidade">${item.quantidade}</td>
     <td data-label="Observção">${item.observacao}</td>
+    <td data-label="Responsável">${item.responsavel}</td>  
   </tr>
 `,
           )
@@ -175,6 +178,7 @@ async function searchData() {
                       <th>Carrinhos</th>
                       <th>Quantidade</th>
                       <th>Observação</th>
+                      <th>Responsável</th>
                     </tr>
                   </thead>
                   <tbody class="tabela-body">${linhas}</tbody>
