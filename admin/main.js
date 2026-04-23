@@ -438,7 +438,7 @@ function renderizarModoEdicao(dados) {
       .map(
         (item) => `
     <tr>
-        <td><input type="text" class="searchInput" value="${formatarDataBR(item.data)}"></td>
+        <td><input type="text" class="searchInput" style="width:100px" value="${formatarDataBR(item.data)}"></td>
         <td><input type="text" class="searchInput" value="${item.Usuario || item.responsavel || ""}"></td>
         <td><input type="text" class="searchInput" style="width:50px" value="${item.bloco || ""}"></td>
         <td><input type="text" class="searchInput" style="width:70px" value="${item.horarioAbertura || ""}"></td>
