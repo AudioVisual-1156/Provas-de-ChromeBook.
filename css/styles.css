@@ -3,8 +3,8 @@ body {
   font-family: Arial, sans-serif;
   text-align: center;
   margin: 0;
-  padding: 0 10px 40px 10px;
   background-color: #f9f9f9;
+  padding: 0;
 }
 
 h1 {
@@ -12,12 +12,14 @@ h1 {
   font-weight: bold;
   text-align: center;
   margin: 0;
+  margin-top: 15px;
 }
 
 h2 {
   color: #00008b;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  margin-bottom: 30px !important;
+  margin-top: 1px !important;
+  margin-bottom: 1px !important;
 }
 
 .tituloContainer {
@@ -27,24 +29,8 @@ h2 {
   flex-direction: column;
 }
 
-.search-container {
-  margin: 20px auto;
-  width: 70%;
-}
-
-.searchInput {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 16px;
-  box-sizing: border-box;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
 .bloco-container {
   width: 75%;
-  margin: 10px auto;
   text-align: left;
 }
 
